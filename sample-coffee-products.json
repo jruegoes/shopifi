@@ -1,0 +1,137 @@
+[
+  {
+    "title": "Premium Ethiopian Coffee Blend",
+    "description": "A rich, full-bodied coffee with notes of chocolate and citrus. Sourced from the highlands of Ethiopia, this premium blend offers a complex flavor profile that coffee enthusiasts will love.",
+    "vendor": "Artisan Coffee Co.",
+    "product_type": "Coffee",
+    "tags": ["coffee", "premium", "ethiopian", "arabica", "coffee-product"],
+    "template_suffix": "coffee",
+    "variants": [
+      {
+        "title": "250g Bag",
+        "price": "24.99",
+        "inventory_quantity": 100,
+        "weight": 250,
+        "weight_unit": "g"
+      },
+      {
+        "title": "500g Bag", 
+        "price": "44.99",
+        "inventory_quantity": 50,
+        "weight": 500,
+        "weight_unit": "g"
+      }
+    ],
+    "images": [
+      "https://cdn.shopify.com/s/files/1/0234/5678/products/ethiopian-coffee.jpg"
+    ]
+  },
+  {
+    "title": "Colombian Dark Roast",
+    "description": "Bold and intense dark roast coffee from the mountains of Colombia. Perfect for espresso or French press brewing. This coffee delivers a robust flavor with smoky undertones.",
+    "vendor": "Artisan Coffee Co.",
+    "product_type": "Coffee", 
+    "tags": ["coffee", "dark-roast", "colombian", "espresso", "coffee-product"],
+    "template_suffix": "coffee",
+    "variants": [
+      {
+        "title": "250g Bag",
+        "price": "22.99",
+        "inventory_quantity": 75,
+        "weight": 250,
+        "weight_unit": "g"
+      },
+      {
+        "title": "500g Bag",
+        "price": "39.99", 
+        "inventory_quantity": 40,
+        "weight": 500,
+        "weight_unit": "g"
+      }
+    ],
+    "images": [
+      "https://cdn.shopify.com/s/files/1/0234/5678/products/colombian-dark.jpg"
+    ]
+  },
+  {
+    "title": "Brazilian Medium Roast",
+    "description": "Smooth and balanced medium roast with nutty and caramel notes. This Brazilian coffee is perfect for daily drinking and pairs well with milk-based beverages.",
+    "vendor": "Artisan Coffee Co.",
+    "product_type": "Coffee",
+    "tags": ["coffee", "medium-roast", "brazilian", "smooth", "coffee-product"],
+    "template_suffix": "coffee",
+    "variants": [
+      {
+        "title": "250g Bag",
+        "price": "19.99",
+        "inventory_quantity": 120,
+        "weight": 250,
+        "weight_unit": "g"
+      },
+      {
+        "title": "500g Bag",
+        "price": "35.99",
+        "inventory_quantity": 60,
+        "weight": 500,
+        "weight_unit": "g"
+      }
+    ],
+    "images": [
+      "https://cdn.shopify.com/s/files/1/0234/5678/products/brazilian-medium.jpg"
+    ]
+  },
+  {
+    "title": "Guatemala Light Roast",
+    "description": "Bright and fruity light roast with floral notes and a crisp finish. This Guatemalan coffee showcases the origin's unique terroir and is perfect for pour-over brewing.",
+    "vendor": "Artisan Coffee Co.",
+    "product_type": "Coffee",
+    "tags": ["coffee", "light-roast", "guatemalan", "fruity", "coffee-product"],
+    "template_suffix": "coffee",
+    "variants": [
+      {
+        "title": "250g Bag",
+        "price": "26.99",
+        "inventory_quantity": 80,
+        "weight": 250,
+        "weight_unit": "g"
+      },
+      {
+        "title": "500g Bag",
+        "price": "47.99",
+        "inventory_quantity": 35,
+        "weight": 500,
+        "weight_unit": "g"
+      }
+    ],
+    "images": [
+      "https://cdn.shopify.com/s/files/1/0234/5678/products/guatemala-light.jpg"
+    ]
+  },
+  {
+    "title": "Decaf Swiss Water Process",
+    "description": "Premium decaffeinated coffee processed using the Swiss Water method to preserve flavor. All the taste of our premium blend without the caffeine.",
+    "vendor": "Artisan Coffee Co.",
+    "product_type": "Coffee",
+    "tags": ["coffee", "decaf", "swiss-water", "caffeine-free", "coffee-product"],
+    "template_suffix": "coffee",
+    "variants": [
+      {
+        "title": "250g Bag",
+        "price": "27.99",
+        "inventory_quantity": 60,
+        "weight": 250,
+        "weight_unit": "g"
+      },
+      {
+        "title": "500g Bag",
+        "price": "49.99",
+        "inventory_quantity": 25,
+        "weight": 500,
+        "weight_unit": "g"
+      }
+    ],
+    "images": [
+      "https://cdn.shopify.com/s/files/1/0234/5678/products/decaf-swiss.jpg"
+    ]
+  }
+] 

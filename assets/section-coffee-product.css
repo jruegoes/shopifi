@@ -1,0 +1,317 @@
+/* Coffee Product Specific Styles */
+.coffee-product {
+  --coffee-primary: #8B5A2B;
+  --coffee-secondary: #D2B48C;
+  --coffee-accent: #F4F4F4;
+  --coffee-text: #2C1810;
+  --coffee-border: #E8E0D7;
+}
+
+/* Coffee Options Styling */
+.coffee-options {
+  padding: 2rem 0;
+  border-bottom: 1px solid var(--coffee-border);
+  margin-bottom: 2rem;
+}
+
+.coffee-option-group {
+  margin-bottom: 2.5rem;
+}
+
+.coffee-option-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--coffee-text);
+  margin-bottom: 1rem;
+  font-family: var(--font-heading-family);
+}
+
+/* Flavor Selector */
+.flavor-selector {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.flavor-option {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.flavor-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.flavor-label {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--coffee-border);
+  border-radius: 8px;
+  background: white;
+  color: var(--coffee-text);
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  min-width: 100px;
+  text-align: center;
+}
+
+.flavor-option input[type="radio"]:checked + .flavor-label {
+  background: var(--coffee-primary);
+  color: white;
+  border-color: var(--coffee-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 90, 43, 0.3);
+}
+
+.flavor-option:hover .flavor-label {
+  border-color: var(--coffee-primary);
+  transform: translateY(-1px);
+}
+
+/* Quantity Selector */
+.quantity-selector {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.quantity-option {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.quantity-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.quantity-label {
+  display: inline-block;
+  padding: 1rem 1.5rem;
+  border: 2px solid var(--coffee-border);
+  border-radius: 8px;
+  background: white;
+  color: var(--coffee-text);
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  min-width: 120px;
+  text-align: center;
+  font-size: 1.1rem;
+}
+
+.quantity-option input[type="radio"]:checked + .quantity-label {
+  background: var(--coffee-secondary);
+  color: var(--coffee-text);
+  border-color: var(--coffee-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(210, 180, 140, 0.4);
+}
+
+.quantity-option:hover .quantity-label {
+  border-color: var(--coffee-primary);
+  transform: translateY(-1px);
+}
+
+/* Purchase Options */
+.purchase-selector {
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+}
+
+.purchase-option {
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.purchase-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.purchase-label {
+  display: inline-block;
+  padding: 1rem 1.5rem;
+  border: 2px solid var(--coffee-border);
+  border-radius: 8px;
+  background: white;
+  color: var(--coffee-text);
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  width: 100%;
+  text-align: left;
+  font-size: 1.1rem;
+}
+
+.purchase-option input[type="radio"]:checked + .purchase-label {
+  background: #E8F5E8;
+  color: #2D5016;
+  border-color: #4CAF50;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+}
+
+.purchase-option:hover .purchase-label {
+  border-color: var(--coffee-primary);
+}
+
+/* Add subscription badge */
+.purchase-option:nth-child(2) .purchase-label::after {
+  content: "Save 15%";
+  position: absolute;
+  top: -8px;
+  right: 15px;
+  background: #4CAF50;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Dynamic Gifts Styling */
+.dynamic-gifts {
+  background: var(--coffee-accent);
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  border: 1px solid var(--coffee-border);
+}
+
+.gifts-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--coffee-text);
+  margin-bottom: 1.5rem;
+  font-family: var(--font-heading-family);
+}
+
+.gifts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.gift-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--coffee-border);
+  transition: all 0.3s ease;
+  opacity: 0.6;
+}
+
+.gift-item.active {
+  opacity: 1;
+  background: #FFF8F0;
+  border-color: var(--coffee-primary);
+  box-shadow: 0 2px 8px rgba(139, 90, 43, 0.1);
+}
+
+.gift-icon {
+  color: var(--coffee-primary);
+  flex-shrink: 0;
+}
+
+.gift-item span {
+  font-weight: 500;
+  color: var(--coffee-text);
+}
+
+/* Add to Cart Button Enhancement */
+.coffee-add-to-cart {
+  background: var(--coffee-primary) !important;
+  border-color: var(--coffee-primary) !important;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 1.2rem 2rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.coffee-add-to-cart:hover {
+  background: #6D4521 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 90, 43, 0.3);
+}
+
+/* Responsive Design */
+@media screen and (max-width: 749px) {
+  .flavor-selector,
+  .quantity-selector {
+    flex-direction: column;
+  }
+  
+  .flavor-label,
+  .quantity-label {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .coffee-options {
+    padding: 1.5rem 0;
+  }
+  
+  .dynamic-gifts {
+    padding: 1.5rem;
+  }
+}
+
+@media screen and (max-width: 550px) {
+  .coffee-option-title {
+    font-size: 1.2rem;
+  }
+  
+  .gifts-title {
+    font-size: 1.2rem;
+  }
+  
+  .flavor-label,
+  .quantity-label,
+  .purchase-label {
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+  }
+}
+
+/* Animation for gift transitions */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.gift-item.active {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* Coffee theme enhancements */
+.coffee-product .product__title h1 {
+  color: var(--coffee-text);
+  font-weight: 700;
+}
+
+.coffee-product .price {
+  color: var(--coffee-primary);
+  font-weight: 600;
+} 
