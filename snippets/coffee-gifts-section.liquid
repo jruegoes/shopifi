@@ -1,0 +1,27 @@
+<!-- Free Gifts Section -->
+<div class="gifts-section">
+  <h3 class="section-title">🎁 FREE Gifts with Your Order</h3>
+  <div class="gifts-container" id="gifts-container">
+    <!-- Alpine.js dynamic gifts -->
+    <template x-for="gift in gifts" :key="gift.id">
+      <div class="gift-item" 
+           :class="{ 'unlocked': parseInt(selectedPackage) >= gift.min_package }">
+        <div class="gift-icon" x-text="gift.icon"></div>
+        <div class="gift-details">
+          <div class="gift-name" x-text="gift.name"></div>
+          <div class="gift-value" x-text="gift.value"></div>
+          <div class="gift-requirement" x-text="gift.min_package + (gift.min_package > 1 ? ' PACKAGES' : ' PACKAGE')"></div>
+        </div>
+        <div class="gift-status">
+          <div class="gift-unlocked">FREE</div>
+          <div class="gift-locked">🔒</div>
+        </div>
+      </div>
+    </template>
+    
+    <!-- Debug info -->
+    <div x-show="gifts.length === 0" style="padding: 1rem; background: #f0f0f0; margin: 1rem 0;">
+      <p>Loading gifts... <span x-text="'Gifts loaded: ' + gifts.length"></span></p>
+    </div>
+  </div>
+</div> 

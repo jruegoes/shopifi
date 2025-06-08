@@ -1,0 +1,250 @@
+<!-- Alpine.js CDN -->
+<script src="//unpkg.com/alpinejs" defer></script>
+
+<!-- Product variants data for Alpine.js -->
+<script type="application/json" id="product-variants-data">
+  {
+    "variants": [
+      {%- for variant in product.variants -%}
+        {
+          "id": {{ variant.id }},
+          "title": {{ variant.title | json }},
+          "price": {{ variant.price }},
+          "compare_at_price": {% if variant.compare_at_price %}{{ variant.compare_at_price }}{% else %}null{% endif %},
+          "available": {{ variant.available | json }},
+          "options": {{ variant.options | json }},
+          "option1": {{ variant.option1 | json }},
+          "option2": {{ variant.option2 | json }},
+          "option3": {{ variant.option3 | json }}
+        }{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    ],
+    "options": {{ product.options | json }},
+    "selected_variant_id": {{ product.selected_or_first_available_variant.id }}
+  }
+</script>
+
+<!-- Gift products data -->
+<script type="application/json" id="gift-products-data">
+  {{ product.metafields.gifts.package_gifts.value | json }}
+</script>
+
+<!-- Alpine.js Coffee Product Component -->
+<script>
+  document.addEventListener('alpine:init', () => {
+    Alpine.data('coffeeProduct', () => ({
+      // Reactive data
+      selectedFlavor: '{{ product.options_with_values[0].values[0] }}',
+      selectedPackage: '1',
+      productData: {},
+      currentVariant: null,
+      availablePackages: [],
+      gifts: [],
+
+      // Initialize
+      async init() {
+        this.loadProductData();
+        await this.loadGiftData();
+        
+        // Check if gifts loaded properly
+        if (this.gifts.length === 0) {
+          // No gifts loaded - check product metafields
+        }
+        
+        this.updateAvailablePackages();
+        this.updateCurrentVariant();
+          
+        // Watch for changes to trigger updates
+        this.$watch('selectedFlavor', () => this.updatePackageOptions());
+        this.$watch('selectedPackage', () => {
+          this.updateCurrentVariant();
+          // Don't automatically update gifts on package change
+          // Only update when product is added to cart
+        });
+      },
+
+      // Load product data from JSON
+      loadProductData() {
+        const dataElement = document.querySelector('#product-variants-data');
+        if (dataElement) {
+          try {
+            this.productData = JSON.parse(dataElement.textContent);
+          } catch (e) {
+            this.productData = { variants: [], options: [] };
+          }
+        }
+      },
+
+      // Load gift data from JSON
+      async loadGiftData() {
+        const giftElement = document.querySelector('#gift-products-data');
+        
+        if (!giftElement) {
+          this.gifts = [];
+          return;
+        }
+
+        if (!giftElement.textContent || giftElement.textContent.trim() === '' || giftElement.textContent.trim() === 'null') {
+          this.gifts = [];
+          return;
+        }
+
+        try {
+          const giftConfig = JSON.parse(giftElement.textContent);
+
+          if (!giftConfig || !giftConfig.gifts) {
+            this.gifts = [];
+            return;
+          }
+
+          this.gifts = giftConfig.gifts;
+
+        } catch (e) {
+          this.gifts = [];
+        }
+      },
+
+      // Update available packages for selected flavor
+      updateAvailablePackages() {
+        if (!this.selectedFlavor || !this.productData.variants) {
+          this.availablePackages = [];
+          return;
+        }
+        
+        const flavorVariants = this.productData.variants.filter(variant => 
+          variant.option1 === this.selectedFlavor || variant.options[0] === this.selectedFlavor
+        );
+        
+        const packages = [];
+        const packageSizes = [...new Set(flavorVariants.map(v => v.option2 || v.options[1]))];
+        
+        packageSizes.sort((a, b) => parseInt(a) - parseInt(b));
+        
+        packageSizes.forEach(size => {
+          const variant = flavorVariants.find(v => (v.option2 === size || v.options[1] === size));
+          if (variant) {
+            packages.push({
+              size: size,
+              variant: variant,
+              title: `${size}x Coffee 2.0`,
+              subtitle: this.getPackageSubtitle(size),
+              badge: size === '2' ? 'Most Popular' : size === '3' ? 'Best Value' : ''
+            });
+          }
+        });
+        
+        this.availablePackages = packages;
+      },
+
+      // Update package options based on selected flavor
+      updatePackageOptions() {
+        this.updateAvailablePackages();
+        // Reset package selection when flavor changes
+        this.selectedPackage = '1';
+        this.updateCurrentVariant();
+      },
+
+      // Update current variant based on selections
+      updateCurrentVariant() {
+        if (!this.selectedFlavor || !this.selectedPackage) return;
+
+        const variant = this.productData.variants.find(v => {
+          return (v.option1 === this.selectedFlavor || v.options[0] === this.selectedFlavor) &&
+                 (v.option2 === this.selectedPackage || v.options[1] === this.selectedPackage);
+        });
+
+        if (variant) {
+          this.currentVariant = variant;
+        }
+      },
+
+      // Add to cart handler
+      async addToCart() {
+        if (!this.currentVariant || !this.currentVariant.available) return;
+
+        try {
+          // Build items array with main product + eligible gifts
+          const itemsToAdd = [];
+          
+          // Add main product
+          itemsToAdd.push({
+            id: this.currentVariant.id,
+            quantity: 1
+          });
+          
+          // Add eligible gifts based on package level
+          const selectedPkg = parseInt(this.selectedPackage);
+          const eligibleGifts = this.gifts.filter(gift => 
+            selectedPkg >= gift.min_package && 
+            gift.product_handle !== 'free-shipping-service' && 
+            gift.variant_id
+          );
+          
+          // Add each eligible gift to the items array
+          eligibleGifts.forEach(gift => {
+            itemsToAdd.push({
+              id: gift.variant_id,
+              quantity: 1,
+              properties: {
+                '_gift': 'true',
+                '_gift_with_package': this.selectedPackage,
+                '_gift_name': gift.name
+              }
+            });
+          });
+
+          // Add all items in a single API call
+          const response = await fetch('/cart/add.js', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ items: itemsToAdd })
+          });
+
+          if (!response.ok) {
+            return;
+          }
+
+          const result = await response.json();
+          
+          // Trigger cart update events to open cart modal/drawer
+          document.dispatchEvent(new CustomEvent('cart:updated'));
+          document.dispatchEvent(new CustomEvent('cart:build'));
+          
+          // Try to trigger theme-specific cart drawer/modal
+          if (window.theme && window.theme.cartDrawer) {
+            window.theme.cartDrawer.open();
+          } else if (window.cartDrawer && window.cartDrawer.open) {
+            window.cartDrawer.open();
+          } else if (document.querySelector('[data-cart-drawer]')) {
+            document.querySelector('[data-cart-drawer]').classList.add('active');
+          }
+          
+          // Fallback - redirect to cart if no drawer found
+          setTimeout(() => {
+            if (!document.querySelector('.cart-drawer.active, .cart-modal.active, [data-cart-drawer].active')) {
+              window.location.href = '/cart';
+            }
+          }, 1000);
+
+        } catch (error) {
+          // Silent error handling
+        }
+      },
+
+      // Format money helper
+      formatMoney(cents) {
+        return '€' + (cents / 100).toFixed(2);
+      },
+      
+      // Get package subtitle
+      getPackageSubtitle(packageSize) {
+        const daysSupply = parseInt(packageSize) * 30;
+        const pricePerDay = packageSize === '1' ? '1.30€/day' : 
+                           packageSize === '2' ? '1.07€/day' : '0.86€/day';
+        return `${daysSupply} Days Supply, ${pricePerDay}`;
+      }
+    }))
+  })
+</script> 

@@ -1,0 +1,65 @@
+<!-- Coffee Variant Picker -->
+{% unless product.has_only_default_variant %}
+  <div class="coffee-variant-picker">
+    
+    <!-- Flavor Selection -->
+    <div class="flavor-section">
+      <h3 class="section-title">Choose Your Flavor</h3>
+      <div class="flavor-options">
+        {% assign flavor_values = product.options_with_values[0].values %}
+        {% for flavor in flavor_values %}
+        <label class="flavor-option">
+          <input type="radio" 
+                 name="flavor" 
+                 value="{{ flavor }}" 
+                 {% if forloop.first %}checked{% endif %}
+                 x-model="selectedFlavor"
+                 @change="updatePackageOptions()">
+          <span class="flavor-btn">{{ flavor }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Package Selection -->
+    <div class="package-section">
+      <h3 class="section-title">Order More & Save</h3>
+      <div class="package-options" id="package-options-container" x-show="selectedFlavor">
+        <template x-for="pkg in availablePackages" :key="pkg.size">
+          <label class="package-option" :data-package="pkg.size">
+            <input type="radio" 
+                   name="package" 
+                   :value="pkg.size" 
+                   :data-variant-id="pkg.variant.id"
+                   x-model="selectedPackage">
+            <div class="package-content">
+              <div x-show="pkg.badge" class="package-badge" :class="pkg.badge === 'Most Popular' ? 'package-badge--popular' : 'package-badge--value'" x-text="pkg.badge"></div>
+              <div class="package-left">
+                <div class="package-radio-wrapper"></div>
+                <div class="package-details">
+                  <div class="package-title" x-text="pkg.title"></div>
+                  <div class="package-subtitle" x-text="pkg.subtitle"></div>
+                  <div class="package-gifts">🎁 FREE gifts</div>
+                </div>
+              </div>
+              <div class="package-right">
+                <div class="package-price-container">
+                  <span class="package-price-main" x-text="formatMoney(pkg.variant.price)"></span>
+                  <span class="package-price-original" 
+                        x-show="pkg.variant.compare_at_price && pkg.size !== '1'" 
+                        x-text="pkg.variant.compare_at_price ? formatMoney(pkg.variant.compare_at_price) : ''"></span>
+                </div>
+                <div class="package-savings" 
+                     x-show="pkg.variant.compare_at_price && pkg.size !== '1'"
+                     x-text="'Save ' + Math.round(((pkg.variant.compare_at_price - pkg.variant.price) / pkg.variant.compare_at_price) * 100) + '%'"></div>
+              </div>
+              <div class="package-unavailable" 
+                   x-show="!pkg.variant.available">Out of Stock</div>
+            </div>
+          </label>
+        </template>
+      </div>
+    </div>
+
+  </div>
+{% endunless %} 

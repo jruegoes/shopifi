@@ -8,7 +8,10 @@
   {% if section.settings.image_zoom == 'hover' %}
     data-zoom-on-hover
   {% endif %}
+  x-data="coffeeProduct()"
+  x-init="init()"
 >
+  <!-- Stylesheets -->
   {{ 'section-main-product.css' | asset_url | stylesheet_tag }}
   {{ 'section-coffee-product.css' | asset_url | stylesheet_tag }}
   {{ 'component-accordion.css' | asset_url | stylesheet_tag }}
@@ -31,8 +34,8 @@
     }
   {%- endstyle -%}
 
+  <!-- Scripts -->
   <script src="{{ 'product-info.js' | asset_url }}" defer="defer"></script>
-  <script src="{{ 'coffee-product.js' | asset_url }}" defer="defer"></script>
 
   {% if section.settings.image_zoom == 'hover' %}
     <script id="EnableZoomOnHover-main" src="{{ 'magnify.js' | asset_url }}" defer="defer"></script>
@@ -61,314 +64,45 @@
   {%- endif -%}
 
   {% assign variant_images = product.images | where: 'attached_to_variant?', true | map: 'src' %}
-  <div class="page-width">
-    <div class="product product--{{ section.settings.media_size }} product--{{ section.settings.media_position }} product--{{ section.settings.gallery_layout }} product--mobile-{{ section.settings.mobile_thumbnails }} grid grid--1-col {% if product.media.size > 0 %}grid--2-col-tablet{% else %}product--no-media{% endif %}">
-      <div class="grid__item product__media-wrapper">
-        {% render 'product-media-gallery', variant_images: variant_images %}
-      </div>
-      <div class="product__info-wrapper grid__item{% if settings.page_width > 1400 and section.settings.media_size == "small" %} product__info-wrapper--extra-padding{% endif %}{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
-        <section
-          id="ProductInfo-{{ section.id }}"
-          class="product__info-container{% if section.settings.enable_sticky_info %} product__column-sticky{% endif %}"
-        >
-          {%- assign product_form_id = 'product-form-' | append: section.id -%}
+  
+  <div class="coffee-product-container">
+    <div class="coffee-product-wrapper">
+      
+      <!-- Left Side: Product Images -->
+      {%- render 'coffee-product-media', section_id: section.id -%}
 
-          {%- for block in section.blocks -%}
-            {%- case block.type -%}
-              {%- when '@app' -%}
-                {% render block %}
-              {%- when 'text' -%}
-                <p
-                  class="product__text inline-richtext{% if block.settings.text_style == 'uppercase' %} caption-with-letter-spacing{% elsif block.settings.text_style == 'subtitle' %} subtitle{% endif %}"
-                  {{ block.shopify_attributes }}
-                >
-                  {{- block.settings.text -}}
-                </p>
-              {%- when 'title' -%}
-                <div class="product__title" {{ block.shopify_attributes }}>
-                  <h1>{{ product.title | escape }}</h1>
-                </div>
-              {%- when 'price' -%}
-                <div id="price-{{ section.id }}" role="status" {{ block.shopify_attributes }}>
-                  {%- render 'price',
-                    product: product,
-                    use_variant: true,
-                    show_badges: true,
-                    price_class: 'price--large'
-                  -%}
-                </div>
-              {%- when 'coffee_options' -%}
-                <div class="coffee-options" {{ block.shopify_attributes }}>
-                  {%- if block.settings.show_flavor_selector -%}
-                    <div class="coffee-option-group">
-                      <h3 class="coffee-option-title">Choose Your Flavor</h3>
-                      <div class="flavor-selector">
-                        <label class="flavor-option">
-                          <input type="radio" name="coffee_flavor" value="classic" checked>
-                          <span class="flavor-label">Classic</span>
-                        </label>
-                        <label class="flavor-option">
-                          <input type="radio" name="coffee_flavor" value="mocha">
-                          <span class="flavor-label">Mocha</span>
-                        </label>
-                        <label class="flavor-option">
-                          <input type="radio" name="coffee_flavor" value="vanilla">
-                          <span class="flavor-label">Vanilla</span>
-                        </label>
-                      </div>
-                    </div>
-                  {%- endif -%}
+      <!-- Right Side: Product Info -->
+      <div class="coffee-product-info">
+        
+        <!-- Product Header -->
+        {%- render 'coffee-product-header', section_id: section.id -%}
 
-                  {%- if block.settings.show_quantity_selector -%}
-                    <div class="coffee-option-group">
-                      <h3 class="coffee-option-title">Select Quantity</h3>
-                      <div class="quantity-selector">
-                        <label class="quantity-option">
-                          <input type="radio" name="coffee_quantity" value="1" data-quantity="1" checked>
-                          <span class="quantity-label">1 Piece</span>
-                        </label>
-                        <label class="quantity-option">
-                          <input type="radio" name="coffee_quantity" value="2" data-quantity="2">
-                          <span class="quantity-label">2 Pieces</span>
-                        </label>
-                        <label class="quantity-option">
-                          <input type="radio" name="coffee_quantity" value="3" data-quantity="3">
-                          <span class="quantity-label">3 Pieces</span>
-                        </label>
-                      </div>
-                    </div>
-                  {%- endif -%}
+        <!-- Variant Picker -->
+        {%- render 'coffee-variant-picker' -%}
 
-                  {%- if block.settings.show_purchase_options -%}
-                    <div class="coffee-option-group">
-                      <h3 class="coffee-option-title">Purchase Option</h3>
-                      <div class="purchase-selector">
-                        <label class="purchase-option">
-                          <input type="radio" name="purchase_type" value="onetime" checked>
-                          <span class="purchase-label">One-Time Purchase</span>
-                        </label>
-                        <label class="purchase-option">
-                          <input type="radio" name="purchase_type" value="subscription">
-                          <span class="purchase-label">Subscription (Save 15%)</span>
-                        </label>
-                      </div>
-                    </div>
-                  {%- endif -%}
-                </div>
-              {%- when 'dynamic_gifts' -%}
-                <div class="dynamic-gifts" {{ block.shopify_attributes }}>
-                  <h3 class="gifts-title">Your Free Gifts</h3>
-                  <div class="gifts-container">
-                    <div class="gift-item" data-quantity="1">
-                      <svg class="gift-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                      </svg>
-                      <span>Free Shipping</span>
-                    </div>
-                    <div class="gift-item" data-quantity="2" style="display: none;">
-                      <svg class="gift-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                      </svg>
-                      <span>Free Shipping</span>
-                    </div>
-                    <div class="gift-item" data-quantity="2" style="display: none;">
-                      <svg class="gift-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M3 3h18l-2 13H5L3 3Z"></path>
-                        <path d="M9 3v13"></path>
-                      </svg>
-                      <span>Measuring Spoon</span>
-                    </div>
-                    <div class="gift-item" data-quantity="2" style="display: none;">
-                      <svg class="gift-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                      </svg>
-                      <span>Electric Mixer</span>
-                    </div>
-                    <div class="gift-item" data-quantity="3" style="display: none;">
-                      <svg class="gift-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                      </svg>
-                      <span>Free Shipping</span>
-                    </div>
-                    <div class="gift-item" data-quantity="3" style="display: none;">
-                      <svg class="gift-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M3 3h18l-2 13H5L3 3Z"></path>
-                        <path d="M9 3v13"></path>
-                      </svg>
-                      <span>Measuring Spoon</span>
-                    </div>
-                    <div class="gift-item" data-quantity="3" style="display: none;">
-                      <svg class="gift-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                      </svg>
-                      <span>Electric Mixer</span>
-                    </div>
-                    <div class="gift-item" data-quantity="3" style="display: none;">
-                      <svg class="gift-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M8 21l4-7 4 7"></path>
-                        <path d="M12 3v7"></path>
-                        <path d="M8 3h8"></path>
-                      </svg>
-                      <span>Thermal Mug</span>
-                    </div>
-                  </div>
-                </div>
-              {%- when 'buy_buttons' -%}
-                <div class="product-form__buttons" {{ block.shopify_attributes }}>
-                  {%- liquid
-                    assign check_against_inventory = true
-                    if product.selected_or_first_available_variant.inventory_management != 'shopify' or product.selected_or_first_available_variant.inventory_policy == 'continue'
-                      assign check_against_inventory = false
-                    endif
-                    if product.selected_or_first_available_variant.quantity_rule.min > product.selected_or_first_available_variant.inventory_quantity and check_against_inventory
-                      assign quantity_rule_soldout = true
-                    endif
-                  -%}
-                  <div class="product-form__input product-form__quantity{% if settings.inputs_shadow_vertical_offset != 0 and settings.inputs_shadow_vertical_offset < 0 %} product-form__quantity-top{% endif %}" data-quantity-wrapper>
-                    <label class="quantity__label form__label" for="Quantity-{{ section.id }}">
-                      {{ 'products.product.quantity.label' | t }}
-                      <span class="quantity__rules-cart no-js-hidden{% if cart.item_count == 0 %} hidden{% endif %}">
-                        <span class="loading__spinner">
-                          <svg
-                            aria-hidden="true"
-                            focusable="false"
-                            class="spinner"
-                            viewBox="0 0 66 66"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <circle
-                              class="path"
-                              fill="none"
-                              stroke-width="6"
-                              cx="33"
-                              cy="33"
-                              r="30"
-                            ></circle>
-                          </svg>
-                        </span>
-                      </span>
-                    </label>
-                    <quantity-input class="quantity" data-url="{{ product.url }}" data-section="{{ section.id }}">
-                      <button class="quantity__button" name="minus" type="button">
-                        <span class="visually-hidden">
-                          {{- 'products.product.quantity.decrease' | t: product: product.title | escape -}}
-                        </span>
-                        {% render 'icon-minus' %}
-                      </button>
-                      <input
-                        class="quantity__input"
-                        type="number"
-                        name="quantity"
-                        id="Quantity-{{ section.id }}"
-                        data-quantity-variant-id="{{ product.selected_or_first_available_variant.id }}"
-                        min="{{ product.selected_or_first_available_variant.quantity_rule.min }}"
-                        {% if product.selected_or_first_available_variant.quantity_rule.max != null %}
-                          max="{{ product.selected_or_first_available_variant.quantity_rule.max }}"
-                        {% endif %}
-                        {% if product.selected_or_first_available_variant.quantity_rule.increment != 1 %}
-                          step="{{ product.selected_or_first_available_variant.quantity_rule.increment }}"
-                        {% endif %}
-                        value="{{ product.selected_or_first_available_variant.quantity_rule.min }}"
-                        form="{{ product_form_id }}"
-                      >
-                      <button class="quantity__button" name="plus" type="button">
-                        <span class="visually-hidden">
-                          {{- 'products.product.quantity.increase' | t: product: product.title | escape -}}
-                        </span>
-                        {% render 'icon-plus' %}
-                      </button>
-                    </quantity-input>
-                  </div>
-                  {%- liquid
-                    assign product_form_installment_id = 'product-form-installment-' | append: section.id
-                  -%}
-                  <div class="product-form__buttons">
-                    <button
-                      id="ProductSubmitButton-{{ section.id }}"
-                      type="submit"
-                      name="add"
-                      class="product-form__cart-submit button button--full-width button--primary coffee-add-to-cart"
-                      form="{{ product_form_id }}"
-                      {% if product.selected_or_first_available_variant.available == false or quantity_rule_soldout %}
-                        disabled
-                      {% endif %}
-                    >
-                      <span>
-                        {%- if product.selected_or_first_available_variant.available == false or quantity_rule_soldout -%}
-                          {{ 'products.product.sold_out' | t }}
-                        {%- else -%}
-                          {{ 'products.product.add_to_cart' | t }}
-                        {%- endif -%}
-                      </span>
-                      <div class="loading__spinner hidden">
-                        <svg
-                          aria-hidden="true"
-                          focusable="false"
-                          class="spinner"
-                          viewBox="0 0 66 66"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <circle
-                            class="path"
-                            fill="none"
-                            stroke-width="6"
-                            cx="33"
-                            cy="33"
-                            r="30"
-                          ></circle>
-                        </svg>
-                      </div>
-                    </button>
-                    {%- if block.settings.show_dynamic_checkout -%}
-                      {{ form | payment_button }}
-                    {%- endif -%}
-                  </div>
-                </div>
-                <product-form
-                  class="product-form"
-                  data-hide-errors="{{ block.settings.hide_errors }}"
-                  data-section-id="{{ section.id }}"
-                >
-                  {%- form 'product',
-                    product,
-                    id: product_form_id,
-                    class: 'form',
-                    novalidate: 'novalidate',
-                    data-type: 'add-to-cart-form'
-                  -%}
-                    <input
-                      type="hidden"
-                      name="id"
-                      value="{{ product.selected_or_first_available_variant.id }}"
-                      {% if product.selected_or_first_available_variant.available == false or quantity_rule_soldout %}
-                        disabled
-                      {% endif %}
-                      class="product-variant-id"
-                    >
-                    <input type="hidden" name="properties[Coffee Flavor]" class="coffee-flavor-input">
-                    <input type="hidden" name="properties[Purchase Type]" class="purchase-type-input">
-                    <input type="hidden" name="properties[Selected Gifts]" class="selected-gifts-input">
-                  {%- endform -%}
-                </product-form>
-              {%- when 'description' -%}
-                {%- if product.description != blank -%}
-                  <div class="product__description rte quick-add-hidden" {{ block.shopify_attributes }}>
-                    {{ product.description }}
-                  </div>
-                {%- endif -%}
-              {%- when 'share' -%}
-                {% render 'share-button', block: block, share_link: product.selected_or_first_available_variant.url %}
-            {%- endcase -%}
-          {%- endfor -%}
-        </section>
+        <!-- Buy Buttons -->
+        {%- assign product_form_id = 'product-form-' | append: section.id -%}
+        {%- render 'coffee-product-form', product_form_id: product_form_id -%}
+
+        <!-- Free Gifts Section -->
+        {%- render 'coffee-gifts-section' -%}
+
+        <!-- Product Description -->
+        {% if product.description != blank %}
+          <div class="product-description">
+            <h3 class="section-title">Description</h3>
+            <div class="description-content">
+              {{ product.description }}
+            </div>
+          </div>
+        {% endif %}
+
       </div>
     </div>
   </div>
+
+  <!-- Coffee Product Script -->
+  {%- render 'coffee-product-script' -%}
 </product-info>
 
 {% schema %}
@@ -391,18 +125,6 @@
         {
           "value": "scheme-2",
           "label": "t:sections.all.colors.scheme_2.label"
-        },
-        {
-          "value": "scheme-3",
-          "label": "t:sections.all.colors.scheme_3.label"
-        },
-        {
-          "value": "scheme-4",
-          "label": "t:sections.all.colors.scheme_4.label"
-        },
-        {
-          "value": "scheme-5",
-          "label": "t:sections.all.colors.scheme_5.label"
         }
       ],
       "default": "scheme-1",
@@ -426,66 +148,7 @@
         }
       ],
       "default": "large",
-      "label": "t:sections.main-product.settings.media_size.label",
-      "info": "t:sections.main-product.settings.media_size.info"
-    },
-    {
-      "type": "checkbox",
-      "id": "constrain_to_viewport",
-      "default": true,
-      "label": "t:sections.main-product.settings.constrain_to_viewport.label"
-    },
-    {
-      "type": "select",
-      "id": "media_fit",
-      "options": [
-        {
-          "value": "contain",
-          "label": "t:sections.main-product.settings.media_fit.options__1.label"
-        },
-        {
-          "value": "cover",
-          "label": "t:sections.main-product.settings.media_fit.options__2.label"
-        }
-      ],
-      "default": "contain",
-      "label": "t:sections.main-product.settings.media_fit.label"
-    },
-    {
-      "type": "select",
-      "id": "gallery_layout",
-      "options": [
-        {
-          "value": "stacked",
-          "label": "t:sections.main-product.settings.gallery_layout.options__1.label"
-        },
-        {
-          "value": "thumbnail",
-          "label": "t:sections.main-product.settings.gallery_layout.options__2.label"
-        },
-        {
-          "value": "thumbnail_slider",
-          "label": "t:sections.main-product.settings.gallery_layout.options__3.label"
-        }
-      ],
-      "default": "stacked",
-      "label": "t:sections.main-product.settings.gallery_layout.label"
-    },
-    {
-      "type": "select",
-      "id": "mobile_thumbnails",
-      "options": [
-        {
-          "value": "show",
-          "label": "t:sections.main-product.settings.mobile_thumbnails.options__1.label"
-        },
-        {
-          "value": "hide",
-          "label": "t:sections.main-product.settings.mobile_thumbnails.options__2.label"
-        }
-      ],
-      "default": "hide",
-      "label": "t:sections.main-product.settings.mobile_thumbnails.label"
+      "label": "t:sections.main-product.settings.media_size.label"
     },
     {
       "type": "select",
@@ -502,38 +165,6 @@
       ],
       "default": "left",
       "label": "t:sections.main-product.settings.media_position.label"
-    },
-    {
-      "type": "select",
-      "id": "image_zoom",
-      "options": [
-        {
-          "value": "lightbox",
-          "label": "t:sections.main-product.settings.image_zoom.options__1.label"
-        },
-        {
-          "value": "hover",
-          "label": "t:sections.main-product.settings.image_zoom.options__2.label"
-        },
-        {
-          "value": "none",
-          "label": "t:sections.main-product.settings.image_zoom.options__3.label"
-        }
-      ],
-      "default": "lightbox",
-      "label": "t:sections.main-product.settings.image_zoom.label"
-    },
-    {
-      "type": "checkbox",
-      "id": "hide_variants",
-      "default": true,
-      "label": "t:sections.main-product.settings.hide_variants.label"
-    },
-    {
-      "type": "checkbox",
-      "id": "enable_video_looping",
-      "default": false,
-      "label": "t:sections.main-product.settings.enable_video_looping.label"
     },
     {
       "type": "checkbox",
@@ -621,33 +252,8 @@
       "limit": 1
     },
     {
-      "type": "coffee_options",
-      "name": "Coffee Options",
-      "limit": 1,
-      "settings": [
-        {
-          "type": "checkbox",
-          "id": "show_flavor_selector",
-          "default": true,
-          "label": "Show Flavor Selector"
-        },
-        {
-          "type": "checkbox",
-          "id": "show_quantity_selector",
-          "default": true,
-          "label": "Show Quantity Selector"
-        },
-        {
-          "type": "checkbox",
-          "id": "show_purchase_options",
-          "default": true,
-          "label": "Show Purchase Options"
-        }
-      ]
-    },
-    {
-      "type": "dynamic_gifts",
-      "name": "Dynamic Gifts",
+      "type": "variant_picker",
+      "name": "Variant Picker",
       "limit": 1
     },
     {
@@ -661,13 +267,6 @@
           "default": true,
           "label": "t:sections.main-product.blocks.buy_buttons.settings.show_dynamic_checkout.label",
           "info": "t:sections.main-product.blocks.buy_buttons.settings.show_dynamic_checkout.info"
-        },
-        {
-          "type": "checkbox",
-          "id": "show_gift_card_recipient",
-          "default": true,
-          "label": "t:sections.main-product.blocks.buy_buttons.settings.show_gift_card_recipient.label",
-          "info": "t:sections.main-product.blocks.buy_buttons.settings.show_gift_card_recipient.info"
         }
       ]
     },
@@ -694,14 +293,11 @@
     {
       "name": "Coffee Product",
       "blocks": [
-        "text",
         "title",
         "price",
-        "coffee_options",
-        "dynamic_gifts",
+        "variant_picker",
         "buy_buttons",
-        "description",
-        "share"
+        "description"
       ]
     }
   ]

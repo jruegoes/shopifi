@@ -1,0 +1,15 @@
+<!-- Coffee Product Header -->
+<div class="product-header">
+  <h1 class="product-title">{{ product.title | escape }}</h1>
+  <div class="product-price" id="price-{{ section_id }}">
+    <div class="price price--large">
+      <span class="price-item price-item--regular" x-text="currentVariant ? formatMoney(currentVariant.price) : '{{ product.selected_or_first_available_variant.price | money }}'">
+        {{ product.selected_or_first_available_variant.price | money }}
+      </span>
+      <span x-show="currentVariant && currentVariant.compare_at_price" 
+            class="price-item price-item--sale" 
+            x-text="currentVariant && currentVariant.compare_at_price ? formatMoney(currentVariant.compare_at_price) : ''">
+      </span>
+    </div>
+  </div>
+</div> 

@@ -1,0 +1,58 @@
+<!-- Coffee Product Media Gallery -->
+<div class="coffee-product-media">
+  <div class="coffee-media-gallery">
+    {% if product.media.size > 0 %}
+      <div class="main-image-container">
+        {% for media in product.media limit: 1 %}
+          {% case media.media_type %}
+            {% when 'image' %}
+              <img
+                src="{{ media | image_url: width: 800 }}"
+                alt="{{ media.alt | escape }}"
+                class="main-product-image"
+                id="MainImage-{{ section_id }}"
+                loading="eager"
+              >
+          {% endcase %}
+        {% endfor %}
+      </div>
+      
+      {% if product.media.size > 1 %}
+        <div class="thumbnail-gallery">
+          {% for media in product.media %}
+            {% case media.media_type %}
+              {% when 'image' %}
+                <button 
+                  class="thumbnail-btn {% if forloop.first %}active{% endif %}"
+                  onclick="switchMainImage('{{ media | image_url: width: 800 }}', this)"
+                >
+                  <img
+                    src="{{ media | image_url: width: 120 }}"
+                    alt="{{ media.alt | escape }}"
+                  >
+                </button>
+            {% endcase %}
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="placeholder-image">
+        {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  function switchMainImage(imageSrc, buttonElement) {
+    const mainImage = document.getElementById('MainImage-{{ section_id }}');
+    if (mainImage) {
+      mainImage.src = imageSrc;
+    }
+    
+    // Update active state
+    const thumbnails = document.querySelectorAll('.thumbnail-btn');
+    thumbnails.forEach(thumb => thumb.classList.remove('active'));
+    buttonElement.classList.add('active');
+  }
+</script> 
