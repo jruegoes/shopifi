@@ -1,5 +1,79 @@
 <!-- Coffee Product Form -->
 <div class="product-form-container">
+  <style>
+    .purchase-options {
+      margin-bottom: 20px;
+      padding: 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      background: #f8fafc;
+    }
+    
+    .purchase-option {
+      margin-bottom: 12px;
+    }
+    
+    .purchase-option:last-child {
+      margin-bottom: 0;
+    }
+    
+    .purchase-option input[type="radio"] {
+      margin-right: 8px;
+    }
+    
+    .purchase-option label {
+      font-weight: 500;
+      cursor: pointer;
+    }
+    
+    .selling-plans {
+      margin-top: 12px;
+      margin-left: 24px;
+      padding: 12px;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+    
+    .selling-plan {
+      margin-bottom: 8px;
+    }
+    
+    .selling-plan:last-child {
+      margin-bottom: 0;
+    }
+    
+    .selling-plan input[type="radio"] {
+      margin-right: 8px;
+    }
+    
+    .selling-plan label {
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
+
+  <div class="purchase-options" x-show="currentVariant && currentVariant.available">
+    <div class="purchase-option">
+      <input type="radio" id="one-time" name="purchase-type" value="one-time" x-model="purchaseType">
+      <label for="one-time">One-time Purchase</label>
+    </div>
+    
+    <div class="purchase-option" x-show="productData.selling_plan_groups && productData.selling_plan_groups.length > 0">
+      <input type="radio" id="subscription" name="purchase-type" value="subscription" x-model="purchaseType" :disabled="currentVariantSellingPlans().length === 0">
+      <label for="subscription">Subscribe & Save</label>
+      
+      <div class="selling-plans" x-show="purchaseType === 'subscription' && currentVariantSellingPlans().length > 0">
+        <template x-for="plan in currentVariantSellingPlans()" :key="plan.id">
+          <div class="selling-plan">
+            <input type="radio" :id="'plan-' + plan.id" name="selling-plan" :value="plan.id" x-model="selectedSellingPlan">
+            <label :for="'plan-' + plan.id" x-text="plan.name"></label>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+
   <product-form class="product-form">
     {%- form 'product', product, id: product_form_id, class: 'form', novalidate: 'novalidate', data-type: 'add-to-cart-form' -%}
       <input
@@ -9,16 +83,17 @@
         class="product-variant-id"
         id="variant-id-input"
       >
+      <input type="hidden" name="selling_plan" :value="selectedSellingPlan">
 
       <div class="form-buttons">
         <button
           type="submit"
           name="add"
           class="btn-add-to-cart"
-          :disabled="!currentVariant || !currentVariant.available"
+          :disabled="currentVariant && !currentVariant.available"
           @click.prevent="addToCart()"
         >
-          <span x-text="!currentVariant || !currentVariant.available ? 'Sold Out' : 'Add to Cart'">
+          <span x-text="currentVariant && !currentVariant.available ? 'Sold Out' : (purchaseType === 'subscription' ? 'Subscribe Now' : 'Add to Cart')">
             Add to Cart
           </span>
         </button>

@@ -15,11 +15,13 @@
           "options": {{ variant.options | json }},
           "option1": {{ variant.option1 | json }},
           "option2": {{ variant.option2 | json }},
-          "option3": {{ variant.option3 | json }}
+          "option3": {{ variant.option3 | json }},
+          "selling_plan_allocations": {{ variant.selling_plan_allocations | json }}
         }{% unless forloop.last %},{% endunless %}
       {%- endfor -%}
     ],
     "options": {{ product.options | json }},
+    "selling_plan_groups": {{ product.selling_plan_groups | json }},
     "selected_variant_id": {{ product.selected_or_first_available_variant.id }}
   }
 </script>
@@ -40,6 +42,8 @@
       currentVariant: null,
       availablePackages: [],
       gifts: [],
+      purchaseType: 'one-time',
+      selectedSellingPlan: null,
 
       // Initialize
       async init() {
@@ -60,6 +64,16 @@
           this.updateCurrentVariant();
           // Don't automatically update gifts on package change
           // Only update when product is added to cart
+        });
+        this.$watch('purchaseType', () => {
+          if (this.purchaseType === 'subscription') {
+            const firstPlan = this.currentVariantSellingPlans();
+            if (firstPlan.length > 0) {
+              this.selectedSellingPlan = firstPlan[0].id;
+            }
+          } else {
+            this.selectedSellingPlan = null;
+          }
         });
       },
 
@@ -155,6 +169,14 @@
 
         if (variant) {
           this.currentVariant = variant;
+          if (this.purchaseType === 'subscription') {
+            const plans = this.currentVariantSellingPlans();
+            if (plans.length > 0 && !plans.find(p => p.id === this.selectedSellingPlan)) {
+              this.selectedSellingPlan = plans[0].id;
+            } else if (plans.length === 0) {
+              this.purchaseType = 'one-time';
+            }
+          }
         }
       },
 
@@ -167,10 +189,16 @@
           const itemsToAdd = [];
           
           // Add main product
-          itemsToAdd.push({
+          const mainProduct = {
             id: this.currentVariant.id,
             quantity: 1
-          });
+          };
+
+          if (this.purchaseType === 'subscription' && this.selectedSellingPlan) {
+            mainProduct.selling_plan = this.selectedSellingPlan;
+          }
+
+          itemsToAdd.push(mainProduct);
           
           // Add eligible gifts based on package level
           const selectedPkg = parseInt(this.selectedPackage);
@@ -231,6 +259,33 @@
         } catch (error) {
           // Silent error handling
         }
+      },
+
+      currentVariantSellingPlans() {
+        if (!this.currentVariant || !this.productData.selling_plan_groups) {
+          return [];
+        }
+
+        const variantAllocation = this.currentVariant.selling_plan_allocations;
+        if (!variantAllocation || variantAllocation.length === 0) {
+          return [];
+        }
+
+        const sellingPlans = [];
+
+        this.productData.selling_plan_groups.forEach(group => {
+          if (group.selling_plans) {
+            group.selling_plans.forEach(plan => {
+              sellingPlans.push({
+                id: plan.id,
+                name: plan.name,
+                price_adjustments: plan.price_adjustments || []
+              });
+            });
+          }
+        });
+
+        return sellingPlans;
       },
 
       // Format money helper
